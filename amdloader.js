@@ -275,7 +275,7 @@
         var waiting = queryCallbackAsync();
 
         return {
-            isDefine: isDefine,
+            // isDefine: isDefine,
             setDefine: setDefine,
             getDeps: getDeps,
             get: get,
@@ -291,9 +291,9 @@
             }
         }
 
-        function isDefine() {
-            return isInit;
-        }
+        // function isDefine() {
+        //     return isInit;
+        // }
 
         function get(callback) {
             waiting.add(callback);
