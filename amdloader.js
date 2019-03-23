@@ -701,7 +701,7 @@
             }
 
             function findChild() {
-                var listWidgetsRun = elementFindAll(elementSearch, '*[' + attrNameToRun + ']', attrNameToRun);
+                var listWidgetsRun = elementFindAll(elementSearch, '*[' + attrNameToRun + ']');
                 var result = [];
                 var item = null;
 
@@ -782,19 +782,7 @@
             if (element === document) {
                 element = document.documentElement;
             }
-
-            return convertToArray(element.querySelectorAll(selector));
-
-            function convertToArray(list) {
-
-                var out = [];
-
-                for (var i = 0; i < list.length; i++) {
-                    out.push(list[i]);
-                }
-
-                return out;
-            }
+            return Array.prototype.slice.call(element.querySelectorAll(selector), 0);
         }
 
         function whenRun(element, callback) {
@@ -921,7 +909,7 @@
                     if (listPreload.length > 0) {
                         require(listPreload, function() {});
                     }
-                    require.runnerBox.runElement(document);
+                    window['require']['runnerBox']['runElement'](document);
                 }, 0);
             }
 
