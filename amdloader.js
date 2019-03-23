@@ -1706,12 +1706,9 @@
         }
         
         
-//parseFuncBeginForBuilder
         function mapParser(node) {
             
-            
-            var data = node.getAttribute("data-amd-map");
-            
+            var data = node.getAttribute("data-static-amd-map");
             
             if (typeof(data) === "string") {
                 
@@ -1729,44 +1726,49 @@
             }
             
             
-            var chunks = data.split(" ");
-            
-            var map = {};
-            
-            for (var i=0; i<chunks.length; i++) {
-                splitKeyValue(chunks[i], parseResult);
+            if (typeof(JSON) !== "undefined" && typeof(JSON.parse) === "function") {
+                return JSON.parse(data);
             }
             
-            return map;
-            
-            function splitKeyValue(item, callback) {
-                
-                for (var i=0; i<item.length; i++) {
-                    
-                    if (item[i] === ":") {
-                        
-                        callback(true, item, item.substr(0, i), item.substr(i+1));
-                        return;
-                    }
-                }
-                
-                callback(false);
-            }
-            
-            function parseResult(parseOk, original, itemKey, itemValue){
+            var rvalidtokens = /(,)|(\[|{)|(}|])|"(?:[^"\\\r\n]|\\["\\\/bfnrt]|\\u[\da-fA-F]{4})*"\s*:?|true|false|null|-?(?!0\d)\d+(?:\.\d+|)(?:[eE][+-]?\d+|)/g;
 
-                if (parseOk === true) {
-                    if (map[itemKey]) {
-                        logs_error(47.1, itemKey);
-                    } else {
-                        map[itemKey] = itemValue;
-                    }
+            var requireNonComma,
+                depth = null,
+                str = trim( data + "" );
+
+            return str && !trim(str.replace(rvalidtokens, function(token, comma, open, close) {
+
+                if (requireNonComma && comma) {
+                    depth = 0;
+                }
+
+                if (depth === 0) {
+                    return token;
+                }
+
+                requireNonComma = open || comma;
+
+                depth += !close - !open;
+
+                return "";
+            })) ?
+                (Function("return " + str))() :
+                null;
+            
+            function trim(text) {
+
+                var rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g;
+
+                if (typeof(text.trim) === "function") {
+
+                    return text.trim();
+
                 } else {
-                    logs_error(47.2,  + chunks[i]);
+
+                    return text === null ? "" : (text + "").replace(rtrim, "");
                 }
             }
         }
-//parseFuncEndForBuilder
 
         
         function addEvent(element, event, callback) {
