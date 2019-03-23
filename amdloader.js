@@ -801,15 +801,6 @@
             if (typeof(window.requestAnimationFrame) === 'function') {
                 return window.requestAnimationFrame;
             }
-
-            var vendors = ['ms', 'moz', 'webkit', 'o'];
-            var candidate = null;
-            for (var x = 0; x < vendors.length; ++x) {
-                candidate = window[vendors[x] + 'RequestAnimationFrame'];
-                if (typeof(candidate) === 'function') {
-                    return candidate;
-                }
-            }
             return function(callback) {
                 callback();
             };
