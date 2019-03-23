@@ -174,7 +174,7 @@
 
         function requireOne(path, callback) {
             isFirstRequire = true;
-            var fullPath = scriptLoader.resolvePath(path, 'js', true);
+            var fullPath = scriptLoader.resolvePath(path, 'js');
             if (fullPath in list) {
                 //ok
             } else {
@@ -345,7 +345,7 @@
         };
 
         function isSpecified(path) {
-            var fullPath = resolvePath(path, 'js', false);
+            var fullPath = resolvePath(path, 'js');
             if (isNoEmptyString(fullPath)) {
                 if (fullPath in loadingScriprs) {
                     return true;
@@ -393,7 +393,7 @@
         }
 
         function isLoadLocal(path) {
-            var fullPath = resolvePath(path, 'js', true);
+            var fullPath = resolvePath(path, 'js');
 
             if (isNoEmptyString(fullPath)) {
                 if (fullPath in loadingScriprs) {
