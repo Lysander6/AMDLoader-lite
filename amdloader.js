@@ -1,14 +1,20 @@
 (function() {
-    var isArray = createIsArray();
     var modulesList = createModuleList(); //mapa z modułami (oraz zależnościami)
     var scriptLoader = null; //obiekt którym ładujemy pliki (tworzony po podaiu mapy z konfiguracją)
 
-    freezProperty(window, "require", requireGlobal);
-    freezProperty(window, "define", defineGlobal);
-    freezProperty(requireGlobal, "runnerBox", createRunnerBox(requireGlobal));
-    freezProperty(requireGlobal.runnerBox, "runElement", requireGlobal.runnerBox.runElement);
-    freezProperty(requireGlobal.runnerBox, "whenRun", requireGlobal.runnerBox.whenRun);
-    freezProperty(requireGlobal, "defined", isLoad);
+    window['require'] = requireGlobal;
+    window['define'] = defineGlobal;
+    requireGlobal['runnerBox'] = createRunnerBox(requireGlobal);
+    requireGlobal['runnerBox']['runElement'] = requireGlobal.runnerBox.runElement;
+    requireGlobal['runnerBox']['whenRun'] = requireGlobal.runnerBox.whenRun;
+    requireGlobal['defined'] = isLoad;
+
+    freezeProperty(window, 'require');
+    freezeProperty(window, 'define');
+    freezeProperty(requireGlobal, 'runnerBox');
+    freezeProperty(requireGlobal.runnerBox, 'runElement');
+    freezeProperty(requireGlobal.runnerBox, 'whenRun');
+    freezeProperty(requireGlobal, 'defined');
 
     runStarter(configGlobal, requireGlobal);
 
@@ -20,27 +26,8 @@
         }
     }
 
-    function freezProperty(obj, prop, value) {
-        try {
-            defProp(false);
-        } catch (e1) {
-            try {
-                defProp(true);
-            } catch (e2) {
-                obj[prop] = value;
-            }
-        }
-
-        function defProp(isConfigurable) {
-            Object.defineProperty(obj, prop, {
-                get: function() {
-                    return value;
-                },
-                set: function( /*val*/ ) {
-                },
-                configurable: isConfigurable
-            });
-        }
+    function freezeProperty(obj, prop) {
+        Object.defineProperty(obj, prop, { configurable: false, writable: false });
     }
 
     function configGlobal(conf) {
@@ -59,15 +46,15 @@
             modulesList.define([], deps);
 
         } else if (arguments.length === 2) {
-            if (typeof(deps) === "string" && typeof(moduleDefine) === "function") {
-                // define("modulename", function() {
+            if (typeof(deps) === 'string' && typeof(moduleDefine) === 'function') {
+                // define('modulename', function() {
                 modulesList.define([], moduleDefine);
             } else {
-                // define(["mods ..."], function() {
+                // define(['mods ...'], function() {
                 modulesList.define(deps, moduleDefine);
             }
         } else if (arguments.length === 3) {
-            // define("modulename", ["mods ..."], function(){
+            // define('modulename', ['mods ...'], function(){
             modulesList.define(moduleDefine, thirdArgs);
         } else {
             throw new Error('Malformed define', arguments);
@@ -87,35 +74,35 @@
         };
 
         function getBasePath(path, callback) {
-            var chunks = path.split("/");
+            var chunks = path.split('/');
             if (chunks.length < 2) {
                 return;
             }
 
             chunks.pop();
-            callback(chunks.join("/"));
+            callback(chunks.join('/'));
         }
 
         function combinePath(baseDir, dirModule) {
-            var chunk1 = baseDir.split("/");
-            var chunk2 = dirModule.split("/");
+            var chunk1 = baseDir.split('/');
+            var chunk2 = dirModule.split('/');
 
             if (chunk2.length > 0) {
-                if (chunk2[0] === ".") {
+                if (chunk2[0] === '.') {
                     var outChunks = [];
                     chunk1.forEach(function(item) {
                         outChunks.push(item);
                     });
 
                     chunk2.forEach(function(item) {
-                        if (item === ".") {
+                        if (item === '.') {
                             //nic nie rób z tym członem
                         } else {
                             outChunks.push(item);
                         }
                     });
 
-                    var outPath = outChunks.join("/");
+                    var outPath = outChunks.join('/');
                     if (outPath.indexOf(baseDir) === 0) {
                         return outPath;
                     }
@@ -130,7 +117,7 @@
                 var newDeps = [];
                 for (var i = 0; i < deps.length; i++) {
                     var newDepItem = combinePath(basePathModule, deps[i]);
-                    if (typeof(newDepItem) === "string" && newDepItem !== "") {
+                    if (typeof(newDepItem) === 'string' && newDepItem !== '') {
                         newDeps.push(newDepItem);
                     }
                 }
@@ -178,7 +165,7 @@
                     }
                     isExec = true;
 
-                    if (typeof(callback) === "function") {
+                    if (typeof(callback) === 'function') {
                         callback.apply(null, arrReturn);
                     }
                 }
@@ -187,7 +174,7 @@
 
         function requireOne(path, callback) {
             isFirstRequire = true;
-            var fullPath = scriptLoader.resolvePath(path, "js", true);
+            var fullPath = scriptLoader.resolvePath(path, 'js', true);
             if (fullPath in list) {
                 //ok
             } else {
@@ -220,7 +207,7 @@
                 return;
             }
             if (currentScript !== null) {
-                var srcCurrent = currentScript.getAttribute("src");
+                var srcCurrent = currentScript.getAttribute('src');
                 if (srcCurrent in list) {
                     list[srcCurrent].setDefine(deps, moduleDefine);
                     return;
@@ -358,7 +345,7 @@
         };
 
         function isSpecified(path) {
-            var fullPath = resolvePath(path, "js", false);
+            var fullPath = resolvePath(path, 'js', false);
             if (isNoEmptyString(fullPath)) {
                 if (fullPath in loadingScriprs) {
                     return true;
@@ -368,23 +355,23 @@
         }
 
         function resolvePath(path, extension) {
-            if (path.length > 0 && path[0] === ".") {
+            if (path.length > 0 && path[0] === '.') {
                 return;
             }
 
-            if (path.substr(0, 8) === "https://") {
+            if (path.substr(0, 8) === 'https://') {
                 return path;
-            } else if (path.substr(0, 7) === "http://") {
+            } else if (path.substr(0, 7) === 'http://') {
                 return path;
-            } else if (path.substr(0, 2) === "//") {
+            } else if (path.substr(0, 2) === '//') {
                 return path;
             } else {
                 for (var alias in configPath) {
-                    if (path.indexOf(alias + "/") === 0) {
+                    if (path.indexOf(alias + '/') === 0) {
                         var newPath = path.replace(alias, configPath[alias]);
                         if (path !== newPath) {
                             if (isNoEmptyString(extension)) {
-                                return newPath + "." + extension;
+                                return newPath + '.' + extension;
                             } else {
                                 return newPath;
                             }
@@ -406,7 +393,7 @@
         }
 
         function isLoadLocal(path) {
-            var fullPath = resolvePath(path, "js", true);
+            var fullPath = resolvePath(path, 'js', true);
 
             if (isNoEmptyString(fullPath)) {
                 if (fullPath in loadingScriprs) {
@@ -472,7 +459,7 @@
     }
 
     function isNoEmptyString(value) {
-        return typeof(value) === "string" && value !== "";
+        return typeof(value) === 'string' && value !== '';
     }
 
     //kolejka żądań opróżniana jest synchronicznie
@@ -501,7 +488,7 @@
         }
 
         function exec(args) {
-            if (isArray(args)) {
+            if (Array.isArray(args)) {
                 if (isExec === false) {
                     isExec = true;
                     argsEmit = args;
@@ -533,27 +520,15 @@
         }
 
         function add(call) {
-            if (typeof(call) === "function") {
+            if (typeof(call) === 'function') {
                 waitList.push(call);
                 refreshState();
             }
         }
     }
 
-    function createIsArray() {
-        if (typeof(Array.isArray) === "function") {
-            return function(arg) {
-                return Array.isArray(arg);
-            };
-        } else {
-            return function(arg) {
-                return Object.prototype.toString.call(arg) === '[object Array]';
-            };
-        }
-    }
-
     function createRunnerBox(require) {
-        var attrNameToRun = "data-run-module";
+        var attrNameToRun = 'data-run-module';
         var propStorageName = 'runnerBoxElementProp' + ((new Date()).getTime());
         var requestAnimationFrame = createRequestAnimationFrame();
 
@@ -650,10 +625,10 @@
 
             forEachRun(list, function(item) {
                 var widgetName = getModuleName(item);
-                var part = widgetName.split(".");
+                var part = widgetName.split('.');
 
                 if (part.length !== 2) {
-                    throw new Error("irregulari contents of the attribute data-run-module: " + widgetName);
+                    throw new Error('irregulari contents of the attribute data-run-module: ' + widgetName);
                 }
 
                 var moduleName = part[0];
@@ -665,19 +640,19 @@
 
                         if (hasAttributeToRun(item) && getObject(item).isRun() === false) {
                             getObject(item).setAsRun();
-                            if (module && typeof(module[moduleMethod]) === "function") {
-                                item.setAttribute(attrNameToRun + "-isrun", "1");
+                            if (module && typeof(module[moduleMethod]) === 'function') {
+                                item.setAttribute(attrNameToRun + '-isrun', '1');
 
                                 var outdatedApi = module[moduleMethod](item, function(apiModule) {
                                     getObject(item).setValue(apiModule);
                                 });
 
-                                if (typeof(outdatedApi) !== "undefined") {
+                                if (typeof(outdatedApi) !== 'undefined') {
                                     getObject(item).setValue(outdatedApi);
                                 }
                             } else {
-                                message = "No function \"" + moduleMethod + "\" in module : " + moduleName;
-                                item.setAttribute(attrNameToRun + "-isrun", message);
+                                message = 'No function \'' + moduleMethod + '\' in module : ' + moduleName;
+                                item.setAttribute(attrNameToRun + '-isrun', message);
                                 throw new Error(message);
                             }
                         }
@@ -687,7 +662,7 @@
 
             function getModuleName(item) {
                 var widgetName = item.getAttribute(attrNameToRun);
-                if (typeof(widgetName) === "string" && widgetName !== "") {
+                if (typeof(widgetName) === 'string' && widgetName !== '') {
                     return widgetName;
                 }
                 return null;
@@ -726,7 +701,7 @@
             }
 
             function findChild() {
-                var listWidgetsRun = elementFindAll(elementSearch, "*[" + attrNameToRun + "]", attrNameToRun);
+                var listWidgetsRun = elementFindAll(elementSearch, '*[' + attrNameToRun + ']', attrNameToRun);
                 var result = [];
                 var item = null;
 
@@ -749,7 +724,7 @@
                     }
                 }
 
-                if (element.tagName === "HTML") {
+                if (element.tagName === 'HTML') {
                     return true;
                 }
             }
@@ -764,10 +739,10 @@
             }
 
             function isDataRunModule(domElement) {
-                if (typeof(domElement.getAttribute) !== "function") {
+                if (typeof(domElement.getAttribute) !== 'function') {
                     return false;
                 }
-                return isNoEmptyString(domElement.getAttribute("data-run-module"));
+                return isNoEmptyString(domElement.getAttribute('data-run-module'));
             }
 
             function testParent(elementTest, fnTest) {
@@ -794,7 +769,7 @@
                 }
 
                 function recursionError() {
-                    var error = new Error("Too much recursion");
+                    var error = new Error('Too much recursion');
 
                     setTimeout(function() {
                         throw error;
@@ -830,12 +805,12 @@
 
         function hasAttributeToRun(element) {
             var value = element.getAttribute(attrNameToRun);
-            return (typeof(value) === "string" && value !== "");
+            return (typeof(value) === 'string' && value !== '');
         }
 
 
         function createRequestAnimationFrame() {
-            if (typeof(window.requestAnimationFrame) === "function") {
+            if (typeof(window.requestAnimationFrame) === 'function') {
                 return window.requestAnimationFrame;
             }
 
@@ -843,7 +818,7 @@
             var candidate = null;
             for (var x = 0; x < vendors.length; ++x) {
                 candidate = window[vendors[x] + 'RequestAnimationFrame'];
-                if (typeof(candidate) === "function") {
+                if (typeof(candidate) === 'function') {
                     return candidate;
                 }
             }
@@ -879,16 +854,16 @@
             }
 
             function getListPreLoad() {
-                var list = node.getAttribute("data-amd-preload");
+                var list = node.getAttribute('data-amd-preload');
                 if (isNoEmptyString(list)) {
-                    return list.split(",");
+                    return list.split(',');
                 } else {
                     return [];
                 }
             }
 
             function getTimeoutStart() {
-                var timeoutStart = node.getAttribute("data-timeout-start");
+                var timeoutStart = node.getAttribute('data-timeout-start');
                 if (timeoutStart > 0) {
                     return timeoutStart;
                 } else {
@@ -902,7 +877,7 @@
                 paths: pathConfig
             });
 
-            addEvent(window, "load", function() {
+            addEvent(window, 'load', function() {
                 runMain();
 
                 //dodatkowe zabezpieczenie
@@ -951,18 +926,18 @@
             }
 
             function documentIsComplete() {
-                return document.readyState === "complete";
+                return document.readyState === 'complete';
             }
 
             function documentIsLoaded() {
-                return document.readyState === "loaded";
+                return document.readyState === 'loaded';
             }
         }
 
         function mapParser(node) {
-            var data = node.getAttribute("data-static-amd-map");
-            if (typeof(data) === "string") {
-                if (data === "") {
+            var data = node.getAttribute('data-static-amd-map');
+            if (typeof(data) === 'string') {
+                if (data === '') {
                     return {};
                 } else {
                     //dalsze parsowanie
@@ -981,7 +956,7 @@
 
     //https://developer.mozilla.org/pl/docs/Web/API/Document/currentScript
     function getCurrentScript() {
-        if (document.currentScript && typeof(document.currentScript.getAttribute) === "function") {
+        if (document.currentScript && typeof(document.currentScript.getAttribute) === 'function') {
             return document.currentScript;
         }
         return null;
