@@ -80,7 +80,6 @@
         var waitingDefine = []; //to co wpadło za pomocą funkcji define, wpada na tąże listę
 
         return {
-
             requireModulesWithModuleBase: requireModulesWithModuleBase,
             requireModules: requireModules,
             requireOne: requireOne,
@@ -104,11 +103,11 @@
             if (chunk2.length > 0) {
                 if (chunk2[0] === ".") {
                     var outChunks = [];
-                    forEach(chunk1, function(item) {
+                    chunk1.forEach(function(item) {
                         outChunks.push(item);
                     });
 
-                    forEach(chunk2, function(item) {
+                    chunk2.forEach(function(item) {
                         if (item === ".") {
                             //nic nie rób z tym członem
                         } else {
@@ -144,7 +143,7 @@
             var isExec = false;
             var retValue = {};
 
-            forEach(deps, function(depsName) {
+            deps.forEach(function(depsName) {
                 if (depsName in retValue) {
                     // skip
                 } else {
@@ -256,7 +255,7 @@
             return (path in isScan);
 
             function appendArray(target, newElements) {
-                forEach(newElements, function(item) {
+                newElements.forEach(function(item) {
                     target.push(item);
                 });
             }
@@ -469,12 +468,6 @@
                 isExec = true;
                 callback(script);
             }
-        }
-    }
-
-    function forEach(list, callback) {
-        for (var i = 0; i < list.length; i++) {
-            callback(list[i]);
         }
     }
 
