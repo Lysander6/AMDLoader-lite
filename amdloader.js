@@ -5,15 +5,15 @@
     window['require'] = requireGlobal;
     window['define'] = defineGlobal;
     requireGlobal['runnerBox'] = createRunnerBox(requireGlobal);
-    requireGlobal['runnerBox']['runElement'] = requireGlobal.runnerBox.runElement;
-    requireGlobal['runnerBox']['whenRun'] = requireGlobal.runnerBox.whenRun;
+    requireGlobal['runnerBox']['runElement'] = requireGlobal['runnerBox'].runElement;
+    requireGlobal['runnerBox']['whenRun'] = requireGlobal['runnerBox'].whenRun;
     requireGlobal['defined'] = isLoad;
 
     freezeProperty(window, 'require');
     freezeProperty(window, 'define');
     freezeProperty(requireGlobal, 'runnerBox');
-    freezeProperty(requireGlobal.runnerBox, 'runElement');
-    freezeProperty(requireGlobal.runnerBox, 'whenRun');
+    freezeProperty(requireGlobal['runnerBox'], 'runElement');
+    freezeProperty(requireGlobal['runnerBox'], 'whenRun');
     freezeProperty(requireGlobal, 'defined');
 
     runStarter(configGlobal, requireGlobal);
