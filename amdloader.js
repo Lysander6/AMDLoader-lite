@@ -779,6 +779,10 @@
         }
 
         function elementFindAll(element, selector) {
+            if (!element.querySelectorAll) {
+                // guard for case where `runElement` is called on DOM node that cannot have children (like Text node)
+                return [];
+            }
             if (element === document) {
                 element = document.documentElement;
             }
