@@ -1,0 +1,26 @@
+{
+  "name": "amdloader-lite",
+  "version": "1.0.0",
+  "description": "Lightweight replacement for requirejs-a",
+  "main": "amdloader.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "google-closure-compiler --js=amdloader.js --js_output_file=amdloader.min.js --compilation_level=ADVANCED"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lysander6/AMDLoader-lite.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Lysander6/AMDLoader-lite/issues"
+  },
+  "homepage": "https://github.com/Lysander6/AMDLoader-lite#readme",
+  "dependencies": {
+    "google-closure-compiler": "^20200927.0.0"
+  }
+}

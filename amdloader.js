@@ -2,19 +2,25 @@
     var modulesList = createModuleList(); //mapa z modułami (oraz zależnościami)
     var scriptLoader = null; //obiekt którym ładujemy pliki (tworzony po podaiu mapy z konfiguracją)
 
-    window['require'] = requireGlobal;
-    window['define'] = defineGlobal;
-    requireGlobal['runnerBox'] = createRunnerBox(requireGlobal);
-    requireGlobal['runnerBox']['runElement'] = requireGlobal['runnerBox'].runElement;
-    requireGlobal['runnerBox']['whenRun'] = requireGlobal['runnerBox'].whenRun;
-    requireGlobal['defined'] = isLoad;
+    //window['require'] = requireGlobal;
+    //window['define'] = defineGlobal;
+    //requireGlobal['runnerBox'] = createRunnerBox(requireGlobal);
+    //requireGlobal['runnerBox']['runElement'] = requireGlobal['runnerBox'].runElement;
+    //requireGlobal['runnerBox']['whenRun'] = requireGlobal['runnerBox'].whenRun;
+    //requireGlobal['defined'] = isLoad;
+    //requireGlobal['toUrl'] = toUrl;
+    //defineGlobal['amd'] = {};
 
-    freezeProperty(window, 'require');
-    freezeProperty(window, 'define');
-    freezeProperty(requireGlobal, 'runnerBox');
-    freezeProperty(requireGlobal['runnerBox'], 'runElement');
-    freezeProperty(requireGlobal['runnerBox'], 'whenRun');
-    freezeProperty(requireGlobal, 'defined');
+    freezeProperty(window, 'require', requireGlobal, false);
+    freezeProperty(window, 'define', defineGlobal, false);
+    freezeProperty(requireGlobal, 'runnerBox', createRunnerBox(requireGlobal), false);
+    freezeProperty(requireGlobal['runnerBox'], 'runElement', requireGlobal['runnerBox']['runElement'], false);
+    freezeProperty(requireGlobal['runnerBox'], 'whenRun', requireGlobal['runnerBox']['whenRun'], false);
+    freezeProperty(requireGlobal, 'defined', isLoad, false);
+
+    // legacy
+    freezeProperty(requireGlobal, 'toUrl', toUrl, true);
+    freezeProperty(defineGlobal, 'amd', {}, true);
 
     runStarter(configGlobal, requireGlobal);
 
@@ -26,8 +32,21 @@
         }
     }
 
-    function freezeProperty(obj, prop) {
-        Object.defineProperty(obj, prop, { configurable: false, writable: false });
+    function toUrl(url) {
+        if (isNoEmptyString(url)) {
+            return scriptLoader.resolvePath(url, "", true);
+        }
+    }
+
+    function freezeProperty(obj, prop, value, isConfigurable) {
+        Object.defineProperty(obj, prop, {
+            get: function() {
+                return value;
+            },
+            set: function() {},
+            configurable: isConfigurable
+            // writable: false
+        });
     }
 
     function configGlobal(conf) {
@@ -533,8 +552,8 @@
         var requestAnimationFrame = createRequestAnimationFrame();
 
         return {
-            runElement: runElement,
-            whenRun: whenRun
+            'runElement': runElement,
+            'whenRun': whenRun
         };
 
         //TODO
